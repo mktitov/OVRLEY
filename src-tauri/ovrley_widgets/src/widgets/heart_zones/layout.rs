@@ -232,13 +232,18 @@ pub fn prepare_heart_zones_cache(
     let mut track = layout.active_rect(0);
     track.join(layout.active_rect(ZONE_COUNT - 1));
     track.outset((padding, padding));
-    let font = resolve_styled_font(
-        fonts,
-        Some(&widget.font),
-        layout.height * LABEL_HEIGHT_RATIO,
-        widget.label_font_weight,
-        false,
-    )?;
+    let label_font = widget
+        .show_label
+        .then(|| {
+            resolve_styled_font(
+                fonts,
+                Some(&widget.font),
+                layout.height * LABEL_HEIGHT_RATIO,
+                widget.label_font_weight,
+                false,
+            )
+        })
+        .transpose()?;
     let mut label_paint = Paint::default();
     label_paint.set_anti_alias(true);
     label_paint.set_color(parse_color(&widget.label_color, 1.0));
@@ -290,8 +295,11 @@ pub fn prepare_heart_zones_cache(
                         if !widget.show_label {
                             return Ok(());
                         }
+                        let font = label_font
+                            .as_ref()
+                            .expect("visible heart zone labels have a resolved font");
                         let text = format!("Z{}", index + 1);
-                        let blob = TextBlob::from_str(&text, &font).ok_or_else(|| {
+                        let blob = TextBlob::from_str(&text, font).ok_or_else(|| {
                             WidgetError::Render("unable to lay out heart zone label".into())
                         })?;
                         let (_, ink) = font.measure_str(&text, None);

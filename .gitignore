@@ -1,5 +1,8 @@
 # OS / IDE
 .DS_Store
+.devenv/
+.direnv/
+devenv.local.nix
 .vscode/
 .idea/
 .zed/

@@ -3349,6 +3349,22 @@ fn heart_zones_preview(indicator_style: &str) -> (PreviewSession, Value) {
 }
 
 #[test]
+fn hidden_heart_zone_labels_do_not_require_a_registered_font() {
+    let (_, mut request) = heart_zones_preview("arrow");
+    request["widget"]["show_label"] = json!(false);
+    request["widget"]["font"] = json!("Oxanium.ttf");
+    let mut preview = PreviewSession::default();
+    preview
+        .replace_activity(br#"{"sample_elapsed_seconds":[0,3],"heartrate":[100,180],"trim_end_seconds":3}"#)
+        .unwrap();
+    let id = preview
+        .create_widget(serde_json::from_value(request).unwrap())
+        .unwrap();
+    preview.render(1.5).unwrap();
+    assert!(preview.widgets.contains_key(&id));
+}
+
+#[test]
 fn heart_zones_matches_export_pixels_moves_continuously_and_validates_at_ingress() {
     use ovrley_core::{
         activity::{interpolate::densify_activity, trim::trim_activity},
